@@ -6,7 +6,7 @@ import { graphElements } from './graphs';
 
 // The state of the graph
 export class GraphState {
-  readonly graphType: GraphType = GraphType.BoxWhisker;
+  readonly graphType: GraphType = GraphType.Line;
   readonly renderType: RenderType = RenderType.VX;
 }
 
@@ -47,13 +47,13 @@ export const graphReducer = (state:GraphState = new GraphState(), action: GraphA
 };
 
 // Mapping of the state to the graph props
-const mapStateToProps = ({ graph }): Partial<GraphProps> => ({
-  graphElement: graphElements[graph.graphType],
-  graphType: graph.graphType,
+const mapStateToProps = (state: {graph: GraphState}): Partial<GraphProps> => ({
+  graphElement: graphElements[state.graph.graphType],
+  graphType: state.graph.graphType,
   graphTypes: Object.keys(GraphType)
     .filter((k: string): boolean => GraphType.hasOwnProperty(k) && isNaN(parseInt(`${k}`)))
     .map((k: string): [string, string] => [GraphType[k], k]),
-    renderType: graph.renderType,
+    renderType: state.graph.renderType,
     renderTypes: Object.keys(RenderType)
       .filter((k: string): boolean => RenderType.hasOwnProperty(k) && isNaN(parseInt(`${k}`)))
       .map((k: string): [string, string] => [RenderType[k], k]),

@@ -1,15 +1,24 @@
+import { connect } from 'react-redux';
 import * as React from 'react';
-export type Data = [number,number][];
+
+import { RenderType } from './types';
 
 // Properties
 export type GraphProps = {
-  data: Data,
+  renderType: RenderType,
 }
 
-export class Graph extends React.PureComponent<GraphProps> {
+class GraphBase extends React.PureComponent<GraphProps> {
   render() {
-    return (
-      <span>BoxWhisker</span>
-    );
+    switch (this.props.renderType) {
+      default:
+        return "Box & Whisker graph not implemented yet for " + RenderType[this.props.renderType];
+    }
   }
 }
+
+const mapStateToProps = ({ graph }): Partial<GraphProps> => ({
+  renderType: graph.renderType
+});
+
+export const Graph = connect(mapStateToProps)(GraphBase);

@@ -5,6 +5,8 @@ import { defineMessages } from 'react-intl';
 import Tabs from 'material-ui/Tabs/Tabs';
 import Tab from 'material-ui/Tabs/Tab';
 
+import { GraphType, RenderType } from './graphs/types';
+
 // Localizable strings
 const messages = defineMessages({
 });
@@ -19,9 +21,9 @@ const styles = {
 // Properties
 export type GraphProps = WithStyles<'root'> & {
   graphElement: React.ReactType<any>,
-  graphType: string,
+  graphType: GraphType,
   graphTypes: [string, string][],
-  renderType: string,
+  renderType: RenderType,
   renderTypes: [string, string][],
   handleChangeGraphType: (event: React.ChangeEvent<{}>, value: any) => void | undefined,
   handleChangeRenderType: (event: React.ChangeEvent<{}>, value: any) => void | undefined,
