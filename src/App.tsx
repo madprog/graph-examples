@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { reducer as formReducer } from 'redux-form';
 import { IntlProvider } from 'react-intl';
 import { createLogger } from 'redux-logger';
-import { CounterContainer, counterReducer } from './components/CounterContainer';
+import { GraphContainer, graphReducer } from './components/GraphContainer';
 import { MainPage } from './components/MainPage';
 import { LabeledButton, Text } from './components/shared';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -13,8 +13,8 @@ import { createMuiTheme, Theme } from 'material-ui/styles';
 
 // Combine the reducers
 const rootReducer = combineReducers({
-    // A specific reducer for our counter
-    counter: counterReducer,
+    // A specific reducer for our graph
+    graph: graphReducer,
 
     // Used for redux form
     // you have to pass formReducer under 'form' key,
@@ -93,7 +93,7 @@ export class App extends React.PureComponent<AppProperties, AppState>
       </List>
     );
 
-    const content = (<CounterContainer/>);
+    const content = (<GraphContainer/>);
 
     return (
       <Provider store={store}>
