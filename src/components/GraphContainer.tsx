@@ -1,12 +1,13 @@
 import { connect } from 'react-redux';
 import { GraphProps, Graph } from './Graph';
 
-import { GraphType } from './graphs/types';
+import { GraphType, RenderType } from './graphs/types';
 import { graphElements } from './graphs';
 
 // The state of the graph
 export class GraphState {
   readonly graphType: GraphType = GraphType.BoxWhisker;
+  readonly renderType: RenderType = RenderType.VX;
 }
 
 // Common base action type
@@ -19,8 +20,13 @@ export function replaceGraphType(graphType: GraphType): ChangeGraphAction {
   return { type: 'CHANGE_GRAPH', payload: graphType };
 }
 
+export type ChangeRenderAction = ActionWithPayload<'CHANGE_RENDER', RenderType>;
+export function replaceRenderType(renderType: RenderType): ChangeRenderAction {
+  return { type: 'CHANGE_RENDER', payload: renderType };
+}
+
 // The union of all posible action types
-export type GraphAction = ChangeGraphAction;
+export type GraphAction = ChangeGraphAction | ChangeRenderAction;
 
 // Reducers
 export const graphReducer = (state:GraphState = new GraphState(), action: GraphAction): GraphState => {
@@ -29,6 +35,11 @@ export const graphReducer = (state:GraphState = new GraphState(), action: GraphA
       return state.graphType !== action.payload ? {
         ...state,
         graphType: action.payload,
+      } : state;
+    case 'CHANGE_RENDER':
+      return state.renderType !== action.payload ? {
+        ...state,
+        renderType: action.payload,
       } : state;
     default:
       return state;
@@ -42,11 +53,16 @@ const mapStateToProps = ({ graph }): Partial<GraphProps> => ({
   graphTypes: Object.keys(GraphType)
     .filter((k: string): boolean => GraphType.hasOwnProperty(k) && isNaN(parseInt(`${k}`)))
     .map((k: string): [string, string] => [GraphType[k], k]),
+    renderType: graph.renderType,
+    renderTypes: Object.keys(RenderType)
+      .filter((k: string): boolean => RenderType.hasOwnProperty(k) && isNaN(parseInt(`${k}`)))
+      .map((k: string): [string, string] => [RenderType[k], k]),
 });
 
 // Mapping of dispatch to properties
 const mapDispatchToProps = (dispatch: any): Partial<GraphProps> => ({
   handleChangeGraphType: (event: any, newGraphType: GraphType) => dispatch(replaceGraphType(newGraphType)),
+  handleChangeRenderType: (event: any, newRenderType: RenderType) => dispatch(replaceRenderType(newRenderType)),
 });
 
 // The 'connect' take a Container and returns a high order component

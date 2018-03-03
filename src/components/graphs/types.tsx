@@ -4,3 +4,8 @@ export enum GraphType {
   Histogram,
   Line,
 }
+
+export enum RenderType {
+  VX,
+  ECharts,
+}

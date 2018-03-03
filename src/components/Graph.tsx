@@ -21,7 +21,10 @@ export type GraphProps = WithStyles<'root'> & {
   graphElement: React.ReactType<any>,
   graphType: string,
   graphTypes: [string, string][],
+  renderType: string,
+  renderTypes: [string, string][],
   handleChangeGraphType: (event: React.ChangeEvent<{}>, value: any) => void | undefined,
+  handleChangeRenderType: (event: React.ChangeEvent<{}>, value: any) => void | undefined,
 }
 
 // Main presentation component: without styles
@@ -32,8 +35,25 @@ export class GraphBase extends React.PureComponent<GraphProps> {
       graphType,
       graphTypes,
       handleChangeGraphType,
+      handleChangeRenderType,
+      renderType,
+      renderTypes,
      } = this.props;
     return [
+      <Tabs
+        key="renderTypes"
+        fullWidth
+        onChange={handleChangeRenderType}
+        value={renderType}
+      >
+        {renderTypes.map(([value, label]) => (
+          <Tab
+            key={value}
+            label={label}
+            value={value}
+          />
+        ))}
+      </Tabs>,
       <Tabs
         key="graphTypes"
         fullWidth
