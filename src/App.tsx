@@ -10,6 +10,7 @@ import { LabeledButton, Text } from './components/shared';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import { createMuiTheme, Theme } from 'material-ui/styles';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
 // Combine the reducers
 const rootReducer = combineReducers({
@@ -56,7 +57,7 @@ const middleware = applyMiddleware(
 );
 
 // Create a store with the combined reducers and middleware
-const store = createStore(rootReducer, middleware);
+const store = createStore(rootReducer, composeWithDevTools(middleware));
 
 // The main application
 export type AppProperties = { }
