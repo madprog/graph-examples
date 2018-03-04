@@ -22,7 +22,6 @@ const margin = {
   left: 80,
   right: 80,
 };
-// x is the first data element, y the second
 const x = (d: DataItem): number => d.distanceToAnchor;
 const y = (d: DataItem): number => d.hardness;
 const xMax = width - margin.left - margin.right;
@@ -64,8 +63,8 @@ class GraphBase extends React.PureComponent<GraphProps> {
       tooltipTop,
       voronoiDiagram,
     } = this.props;
-    return [
-      <svg key={1} viewBox={`0 0 ${width} ${height}`}>
+    return (
+      <svg viewBox={`0 0 ${width} ${height}`}>
         <Group
           top={margin.top}
           left={margin.left}
@@ -157,13 +156,12 @@ class GraphBase extends React.PureComponent<GraphProps> {
           />
         </Group>
       </svg>
-    ];
+    );
   }
 }
 
 export const Graph = withTooltip(connect(
   (state: any, ownProps: GraphProps): Partial<GraphProps> => ({
-    data: ownProps.data,
     voronoiDiagram: voronoi({
       x: d => xScale(x(d)),
       y: d => yScale(y(d)),
