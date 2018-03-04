@@ -147,8 +147,16 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
                 strokeWidth={2}
                 style={{ pointerEvents: 'none' }}
               />
-              <Text x={tooltipLeft} y={yMax}>{tooltipData[0]}</Text>
-              <Text x={0} y={tooltipTop}>{tooltipData[1]}</Text>
+              <Text
+                x={tooltipLeft + 10}
+                y={yMax - 10}
+                fontSize={10}
+              >{tooltipData[0]}</Text>
+              <Text
+                x={10}
+                y={tooltipTop - 10}
+                fontSize={10}
+              >{tooltipData[1]}</Text>
             </g>
           )}
           <rect
