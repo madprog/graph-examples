@@ -4,28 +4,33 @@ import * as React from 'react';
 import { RenderType } from './types';
 
 // Properties
-type Data = [number, number][];
+type Data = {
+  id: string,
+  x: number,
+  y: number,
+};
 export type GraphProps = {
-  data: Data,
+  data: Data[],
 }
 export type GraphContainerProps = {
   renderType: RenderType,
 }
 
-const data: Data = [
-  [50, 725],
-  [100, 710],
-  [200, 680],
-  [300, 640],
-  [400, 595],
-  [500, 575],
-  [600, 550],
-  [700, 500],
-  [800, 450],
-  [900, 420],
-  [1000, 420],
+const data: Data[] = [
+  { id: "1",  x: 50,   y: 725 },
+  { id: "2",  x: 100,  y: 710 },
+  { id: "3",  x: 200,  y: 680 },
+  { id: "4",  x: 300,  y: 640 },
+  { id: "5",  x: 400,  y: 595 },
+  { id: "6",  x: 500,  y: 575 },
+  { id: "7",  x: 600,  y: 550 },
+  { id: "8",  x: 700,  y: 500 },
+  { id: "9",  x: 800,  y: 450 },
+  { id: "10", x: 900,  y: 420 },
+  { id: "11", x: 1000, y: 420 },
 ];
 
+// VX implementation
 import { AxisLeft, AxisBottom } from '@vx/axis';
 import { bisector } from 'd3-array';
 import { curveNatural } from '@vx/curve';
@@ -47,8 +52,8 @@ const margin = {
   right: 80,
 };
 // x is the first data element, y the second
-const x = d => d[0];
-const y = d => d[1];
+const x = (d: Data): number => d.x;
+const y = (d: Data): number => d.y;
 const xMax = width - margin.left - margin.right;
 const yMax = height - margin.top - margin.bottom;
 const xScale = scaleLinear({
@@ -63,7 +68,7 @@ const yScale = scaleLinear({
 type VXGraphProps = GraphProps & {
   handleHideToolTip: (event: any) => void,
   handleShowToolTip: (event: any) => void,
-  tooltipData: [number, number],
+  tooltipData: Data,
   tooltipLeft: number,
   tooltipTop: number,
   voronoiDiagram: any,
@@ -80,8 +85,8 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
       tooltipTop,
       voronoiDiagram,
     } = this.props;
-    return (
-      <svg viewBox={`0 0 ${width} ${height}`}>
+    return [
+      <svg key={1} viewBox={`0 0 ${width} ${height}`}>
         <Group
           top={margin.top}
           left={margin.left}
@@ -102,12 +107,15 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
             yScale={yScale}
             width={xMax}
             height={yMax}
+            rowLineStyle={{pointerEvents: 'none'}}
+            columnLineStyle={{pointerEvents: 'none'}}
           />
           <LinePath
             curve={curveNatural}
             data={data}
             x={x} xScale={xScale}
             y={y} yScale={yScale}
+            style={{pointerEvents: 'none'}}
             glyph={(d, i) => (
               <circle
                 key={`line-dot-${i}`}
@@ -121,7 +129,7 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
             )}
           />
           {tooltipData && (
-            <g>
+            <g style={{pointerEvents: 'none'}}>
               <Line
                 from={{ x: tooltipLeft, y: yMax }}
                 to={{ x: tooltipLeft, y: tooltipTop }}
@@ -151,12 +159,12 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
                 x={tooltipLeft + 10}
                 y={yMax - 10}
                 fontSize={10}
-              >{tooltipData[0]}</Text>
+              >{x(tooltipData)}</Text>
               <Text
                 x={10}
                 y={tooltipTop - 10}
                 fontSize={10}
-              >{tooltipData[1]}</Text>
+              >{y(tooltipData)}</Text>
             </g>
           )}
           <rect
@@ -170,13 +178,13 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
           />
         </Group>
       </svg>
-    );
+    ];
   }
 }
 
 const voronoiDiagram = voronoi({
-  x: d => xScale(d[0]),
-  y: d => yScale(d[1]),
+  x: d => xScale(x(d)),
+  y: d => yScale(y(d)),
   width: xMax,
   height: yMax,
 })(data);
@@ -190,7 +198,7 @@ const VXGraph = withTooltip(connect(
     ownProps: {
       hideTooltip: any,
       showTooltip: any,
-      tooltipData: [number, number],
+      tooltipData: Data,
       tooltipLeft: number,
       tooltipTop: number,
       }
