@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@vx/axis": "0.0.158",
+    "@vx/grid": "0.0.158",
+    "@vx/scale": "0.0.153",
     "material-ui": "^1.0.0-beta.33",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
