@@ -36,6 +36,7 @@ import { localPoint } from '@vx/event';
 import { scaleLinear } from '@vx/scale';
 import { Text } from '@vx/text';
 import { Tooltip, withTooltip } from '@vx/tooltip';
+import { voronoi } from '@vx/voronoi';
 
 const height = 400;
 const width = 750;
@@ -60,11 +61,12 @@ const yScale = scaleLinear({
 });
 
 type VXGraphProps = GraphProps & {
-  handleHideToolTip: (data: Data) => ((event: any) => void),
-  handleShowToolTip: (data: Data) => ((event: any) => void),
-  tooltipData: Data,
+  handleHideToolTip: (event: any) => void,
+  handleShowToolTip: (event: any) => void,
+  tooltipData: [number, number],
   tooltipLeft: number,
   tooltipTop: number,
+  voronoiDiagram: any,
 };
 
 class VXGraphBase extends React.PureComponent<VXGraphProps> {
@@ -76,10 +78,14 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
       tooltipData,
       tooltipLeft,
       tooltipTop,
+      voronoiDiagram,
     } = this.props;
     return (
       <svg viewBox={`0 0 ${width} ${height}`}>
-        <Group top={margin.top} left={margin.left}>
+        <Group
+          top={margin.top}
+          left={margin.left}
+        >
           <AxisBottom
             scale={xScale}
             top={yMax}
@@ -102,18 +108,6 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
             data={data}
             x={x} xScale={xScale}
             y={y} yScale={yScale}
-          />
-          <LinePath
-            curve={curveNatural}
-            data={data}
-            x={x} xScale={xScale}
-            y={y} yScale={yScale}
-            strokeWidth={20}
-            stroke="transparent"
-            onTouchStart={handleShowToolTip}
-            onTouchMove={handleShowToolTip}
-            onMouseMove={handleShowToolTip}
-            onMouseLeave={handleHideToolTip}
           />
           {tooltipData && (
             <g>
@@ -146,31 +140,58 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
               <Text x={0} y={tooltipTop}>{tooltipData[1]}</Text>
             </g>
           )}
+          <rect
+            fill="transparent"
+            height={yMax}
+            onTouchStart={handleShowToolTip}
+            onTouchMove={handleShowToolTip}
+            onMouseMove={handleShowToolTip}
+            onMouseLeave={handleHideToolTip}
+            width={xMax}
+          />
         </Group>
       </svg>
     );
   }
 }
 
+const voronoiDiagram = voronoi({
+  x: d => xScale(d[0]),
+  y: d => yScale(d[1]),
+  width: xMax,
+  height: yMax,
+})(data);
+
 const VXGraph = withTooltip(connect(
-  () => ({ data }),
-  (dispatch, ownProps: { hideTooltip: any, showTooltip: any }): Partial<VXGraphProps> => ({
-    handleHideToolTip: (data: Data) => (event: any) => ownProps.hideTooltip(),
-    handleShowToolTip: (data: Data) => (event: any) => {
-      const { x } = localPoint(event);
-      const x0 = xScale.invert(x - margin.left);
-      const index = bisector(d => d[0]).left(data, x0, 1);
-      const d0 = data[index - 1];
-      const d1 = data[index];
-      let d = d0;
-      if (d1 && d1[0]) {
-        d = x0 - d0[0] > d1[0] - x0 ? d1 : d0;
+  (): Partial<VXGraphProps> => ({ data, voronoiDiagram }),
+  (): Partial<VXGraphProps> => ({}),
+  (
+    stateProps: Partial<VXGraphProps>,
+    dispatchProps: Partial<VXGraphProps>,
+    ownProps: {
+      hideTooltip: any,
+      showTooltip: any,
+      tooltipData: [number, number],
+      tooltipLeft: number,
+      tooltipTop: number,
       }
-      ownProps.showTooltip({
-        tooltipData: d,
-        tooltipLeft: xScale(d[0]),
-        tooltipTop: yScale(d[1]),
-      })
+  ): Partial<VXGraphProps> => ({
+    ...stateProps,
+    ...dispatchProps,
+    tooltipData: ownProps.tooltipData,
+    tooltipLeft: ownProps.tooltipLeft,
+    tooltipTop: ownProps.tooltipTop,
+    handleHideToolTip: (event: any) => ownProps.hideTooltip(),
+    handleShowToolTip: (event: any) => {
+      const { x, y } = localPoint(event);
+      const closest = stateProps.voronoiDiagram.find(x - margin.left, y - margin.top);
+      if (closest) {
+        ownProps.showTooltip({
+          tooltipData: closest.data,
+          tooltipLeft: closest[0],
+          tooltipTop: closest[1],
+        });
+      }
     },
   }),
 )(VXGraphBase));
