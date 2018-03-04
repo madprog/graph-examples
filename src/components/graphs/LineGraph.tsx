@@ -108,6 +108,17 @@ class VXGraphBase extends React.PureComponent<VXGraphProps> {
             data={data}
             x={x} xScale={xScale}
             y={y} yScale={yScale}
+            glyph={(d, i) => (
+              <circle
+                key={`line-dot-${i}`}
+                cx={xScale(x(d))}
+                cy={yScale(y(d))}
+                r={6}
+                fill="white"
+                stroke="black"
+                strokeWidth={3}
+              />
+            )}
           />
           {tooltipData && (
             <g>
