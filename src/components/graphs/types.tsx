@@ -12,6 +12,6 @@ export enum RenderType {
 
 export type DataItem = {
   id: string,
-  x: number,
-  y: number,
+  distanceToAnchor: number,
+  hardness: number,
 };

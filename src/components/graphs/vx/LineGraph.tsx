@@ -23,8 +23,8 @@ const margin = {
   right: 80,
 };
 // x is the first data element, y the second
-const x = (d: DataItem): number => d.x;
-const y = (d: DataItem): number => d.y;
+const x = (d: DataItem): number => d.distanceToAnchor;
+const y = (d: DataItem): number => d.hardness;
 const xMax = width - margin.left - margin.right;
 const yMax = height - margin.top - margin.bottom;
 const xScale = scaleLinear({

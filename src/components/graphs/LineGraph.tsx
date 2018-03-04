@@ -13,17 +13,17 @@ export type GraphContainerProps = {
 }
 
 const data: DataItem[] = [
-  { id: "1",  x: 50,   y: 725 },
-  { id: "2",  x: 100,  y: 710 },
-  { id: "3",  x: 200,  y: 680 },
-  { id: "4",  x: 300,  y: 640 },
-  { id: "5",  x: 400,  y: 595 },
-  { id: "6",  x: 500,  y: 575 },
-  { id: "7",  x: 600,  y: 550 },
-  { id: "8",  x: 700,  y: 500 },
-  { id: "9",  x: 800,  y: 450 },
-  { id: "10", x: 900,  y: 420 },
-  { id: "11", x: 1000, y: 420 },
+  { id: "1",  distanceToAnchor: 50,   hardness: 725 },
+  { id: "2",  distanceToAnchor: 100,  hardness: 710 },
+  { id: "3",  distanceToAnchor: 200,  hardness: 680 },
+  { id: "4",  distanceToAnchor: 300,  hardness: 640 },
+  { id: "5",  distanceToAnchor: 400,  hardness: 595 },
+  { id: "6",  distanceToAnchor: 500,  hardness: 575 },
+  { id: "7",  distanceToAnchor: 600,  hardness: 550 },
+  { id: "8",  distanceToAnchor: 700,  hardness: 500 },
+  { id: "9",  distanceToAnchor: 800,  hardness: 450 },
+  { id: "10", distanceToAnchor: 900,  hardness: 420 },
+  { id: "11", distanceToAnchor: 1000, hardness: 420 },
 ];
 
 class GraphBase extends React.PureComponent<GraphContainerProps> {
