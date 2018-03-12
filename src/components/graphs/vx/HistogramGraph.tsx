@@ -3,10 +3,13 @@ import { DataItem } from '../types';
 import React from 'react';
 
 import { AxisLeft, AxisBottom } from '@vx/axis';
-import { Bar } from '@vx/shape';
+import { Line, Bar } from '@vx/shape';
 import { Group } from '@vx/group';
+import { Text } from '@vx/text';
 import { scaleBand, scaleLinear } from '@vx/scale';
 import { extent, max } from 'd3-array';
+import { localPoint } from '@vx/event';
+import { withTooltip } from '@vx/tooltip';
 
 const height = 400;
 const width = 750;
@@ -19,15 +22,106 @@ const margin = {
 const xMax = width - margin.left - margin.right;
 const yMax = height - margin.top - margin.bottom;
 
+type BinData = {
+  x: number,
+  y: number,
+};
+
 type ExternalGraphProps = {
   data: DataItem[],
+  hideTooltip: () => void,
   nbBins: number,
+  showTooltip: (tooltipInfo: { tooltipLeft: number, tooltipTop: number, tooltipData: BinData }) => void,
 };
 
 type GraphProps = ExternalGraphProps & {
+  bins: BinData[],
+  handleHideToolTip: (event: any) => void,
+  handleShowToolTip: (event: any) => void,
+  tooltipData: BinData,
+  tooltipLeft: number,
+  tooltipOpen: boolean,
+  tooltipTop: number,
+  xScale: ((number) => number) & { bandwidth: () => number },
+  yScale: (number) => number,
 };
 
-const collectionToBins = (coll: number[], nbBins: number): [number, number][] => {
+class GraphBase extends React.PureComponent<GraphProps> {
+  render() {
+    const {
+      bins,
+      handleShowToolTip,
+      handleHideToolTip,
+      tooltipData,
+      tooltipLeft,
+      tooltipOpen,
+      tooltipTop,
+      yScale,
+      xScale,
+    } = this.props;
+    return (
+      <svg viewBox={`0 0 ${width} ${height}`}>
+        <Group
+          top={margin.top}
+          left={margin.left}
+        >
+          {bins.map((d: BinData, i: number) => {
+            const { x, y } = d;
+            const barHeight = yMax - yScale(y);
+            return (
+              <Bar
+                key={i}
+                width={xScale.bandwidth()}
+                height={barHeight}
+                x={xScale(x)}
+                y={yMax-barHeight}
+                fill="rgba(92, 119, 235, 1.000)"
+                data={{ x, y }}
+                onTouchStart={handleShowToolTip}
+                onTouchMove={handleShowToolTip}
+                onMouseMove={handleShowToolTip}
+                onMouseLeave={handleHideToolTip}
+              />
+            );
+          })}
+          {tooltipOpen && (
+            <g style={{pointerEvents: 'none'}}>
+              <circle
+                cx={tooltipLeft}
+                cy={tooltipTop}
+                r={4}
+                fill="rgba(92, 119, 235, 1.000)"
+                stroke="white"
+                strokeWidth={2}
+                style={{ pointerEvents: 'none' }}
+              />
+              <Text
+                x={tooltipLeft}
+                y={tooltipTop - 10}
+                fontSize={10}
+                textAnchor="middle"
+              >{tooltipData.y}</Text>
+            </g>
+          )}
+          <AxisBottom
+            scale={xScale}
+            top={yMax}
+            label={'Hardness (Vickers)'}
+            tickFormat={(value) => Math.round(value)}
+          />
+          <AxisLeft
+            scale={yScale}
+            top={0}
+            left={0}
+            label={'Count'}
+          />
+        </Group>
+      </svg>
+    );
+  }
+}
+
+const collectionToBins = (coll: number[], nbBins: number): BinData[] => {
   if (nbBins <= 0) {
     throw 'nbBins must be strictly positive';
   }
@@ -46,74 +140,35 @@ const collectionToBins = (coll: number[], nbBins: number): [number, number][] =>
   }, {});
 
   return Object.entries(bins)
-    .map((e: [string, number]): [number, number] => [parseFloat(e[0]), e[1]]);
+    .map((e: [string, number]): BinData => ({
+      x: parseFloat(e[0]),
+      y: e[1],
+    }));
 }
 
-class GraphBase extends React.PureComponent<GraphProps> {
-  render() {
-    const {
-      data,
-      nbBins,
-    } = this.props;
+export const Graph = withTooltip(connect(
+  (state: any, ownProps: GraphProps): Partial<GraphProps> => {
+    const { data, nbBins } = ownProps;
     const hardnesses = data.map((i: DataItem): number => i.hardness);
-    console.log(hardnesses);
     const bins = collectionToBins(hardnesses, nbBins);
-    const x = (d: [number, number]) => d[0];
-    const y = (d: [number, number]) => d[1];
+    const x: (BinData) => number = (d: BinData): number => d.x;
+    const y: (BinData) => number = (d: BinData): number => d.y;
     const nbMax = max(bins, y);
     const domain = bins.map(x);
     domain.sort((a, b) => a - b);
-    console.log({domain});
-    const xScale = scaleBand({
-      rangeRound: [0, xMax],
-      domain,
-      padding: 0.4,
+    return ({
+      bins,
+      xScale: scaleBand({
+        rangeRound: [0, xMax],
+        domain,
+        padding: 0.4,
+      }),
+      yScale: scaleLinear({
+        rangeRound: [yMax, 0],
+        domain: [0, nbMax],
+      }),
     });
-    const yScale = scaleLinear({
-      rangeRound: [yMax, 0],
-      domain: [0, nbMax],
-    });
-    return (
-      <svg viewBox={`0 0 ${width} ${height}`}>
-        <Group
-          top={margin.top}
-          left={margin.left}
-        >
-        {bins.map((d: [number, number], i: number) => {
-          const [x, y] = d;
-          const barHeight = yMax - yScale(y);
-          return (
-            <Bar
-              key={i}
-              width={xScale.bandwidth()}
-              height={barHeight}
-              x={xScale(x)}
-              y={yMax-barHeight}
-              fill="rgba(92, 119, 235, 1.000)"
-              data={{ x, y }}
-            />
-          );
-        })}
-        <AxisBottom
-          scale={xScale}
-          top={yMax}
-          label={'Hardness (Vickers)'}
-          tickFormat={(value) => Math.round(value)}
-        />
-        <AxisLeft
-          scale={yScale}
-          top={0}
-          left={0}
-          label={'Count'}
-        />
-        </Group>
-      </svg>
-    );
-  }
-}
-
-export const Graph = connect(
-  (state: any, ownProps: GraphProps): Partial<GraphProps> => ({}),
+  },
   (): Partial<GraphProps> => ({}),
   (
     stateProps: Partial<GraphProps>,
@@ -123,5 +178,13 @@ export const Graph = connect(
     ...stateProps,
     ...dispatchProps,
     ...ownProps,
+    handleHideToolTip: (data: BinData) => (event: any) => ownProps.hideTooltip(),
+    handleShowToolTip: (data: BinData) => (event: any) => {
+      ownProps.showTooltip({
+        tooltipData: data,
+        tooltipLeft: stateProps.xScale!(data.x) + 0.5 * stateProps.xScale!.bandwidth(),
+        tooltipTop: stateProps.yScale!(data.y),
+      });
+    },
   }),
-)(GraphBase);
+)(GraphBase));

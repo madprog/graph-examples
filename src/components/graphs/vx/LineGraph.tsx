@@ -11,7 +11,7 @@ import { Line, LinePath } from '@vx/shape';
 import { localPoint } from '@vx/event';
 import { scaleLinear } from '@vx/scale';
 import { Text } from '@vx/text';
-import { Tooltip, withTooltip } from '@vx/tooltip';
+import { withTooltip } from '@vx/tooltip';
 import { voronoi } from '@vx/voronoi';
 
 const height = 400;
@@ -38,15 +38,15 @@ const yScale = scaleLinear({
 type ExternalGraphProps = {
   data: DataItem[],
   hideTooltip: () => void,
-  showTooltip: (tooltipInfo: { tooltipLeft: number, tooltipTop: number, tooltipData: DataItem }) => void,
+  showTooltip: (tooltipInfo: { tooltipLeft: number, tooltipTop: number, tooltipData: { x: number, y: number } }) => void,
 };
 
 type GraphProps = ExternalGraphProps & {
   handleHideToolTip: (event: any) => void,
   handleShowToolTip: (event: any) => void,
-  tooltipOpen: boolean,
   tooltipData: DataItem,
   tooltipLeft: number,
+  tooltipOpen: boolean,
   tooltipTop: number,
   voronoiDiagram: any,
 };
@@ -57,9 +57,9 @@ class GraphBase extends React.PureComponent<GraphProps> {
       data,
       handleHideToolTip,
       handleShowToolTip,
-      tooltipOpen,
       tooltipData,
       tooltipLeft,
+      tooltipOpen,
       tooltipTop,
       voronoiDiagram,
     } = this.props;
