@@ -6,7 +6,7 @@ import { graphElements } from './graphs';
 
 // The state of the graph
 export class GraphState {
-  readonly graphType: GraphType = GraphType.Line;
+  readonly graphType: GraphType = GraphType.BoxWhisker;
   readonly renderType: RenderType = RenderType.VX;
 }
 

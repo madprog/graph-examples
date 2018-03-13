@@ -28,12 +28,14 @@ const xMax = width - margin.left - margin.right;
 const yMax = height - margin.top - margin.bottom;
 const xScale = scaleLinear({
   range: [0, xMax],
-  domain: [0, 1000],
+  domain: [0, Math.sqrt(2)],
 });
 const yScale = scaleLinear({
   range: [yMax, 0],
   domain: [300, 750],
 });
+const withVoronoi = false;
+const withPoints = false;
 
 type ExternalGraphProps = {
   data: DataItem[],
@@ -94,7 +96,7 @@ class GraphBase extends React.PureComponent<GraphProps> {
             x={x} xScale={xScale}
             y={y} yScale={yScale}
             style={{pointerEvents: 'none'}}
-            glyph={(d, i) => (
+            glyph={(d, i) => withPoints && (
               <circle
                 key={`line-dot-${i}`}
                 cx={xScale(x(d))}
@@ -161,14 +163,19 @@ class GraphBase extends React.PureComponent<GraphProps> {
 }
 
 export const Graph = withTooltip(connect(
-  (state: any, ownProps: GraphProps): Partial<GraphProps> => ({
-    voronoiDiagram: voronoi({
-      x: d => xScale(x(d)),
-      y: d => yScale(y(d)),
-      width: xMax,
-      height: yMax,
-    })(ownProps.data),
-  }),
+  (state: any, ownProps: GraphProps): Partial<GraphProps> => {
+    const data = [...ownProps.data];
+    data.sort((a, b) => x(b) - x(a));
+    return ({
+      voronoiDiagram: withVoronoi ? voronoi({
+        x: d => xScale(x(d)),
+        y: d => yScale(y(d)),
+        width: xMax,
+        height: yMax,
+      })(ownProps.data) : undefined,
+      data,
+    });
+  },
   (): Partial<GraphProps> => ({}),
   (
     stateProps: Partial<GraphProps>,
@@ -178,8 +185,9 @@ export const Graph = withTooltip(connect(
     ...stateProps,
     ...dispatchProps,
     ...ownProps,
+    data: stateProps.data,
     handleHideToolTip: (event: any) => ownProps.hideTooltip(),
-    handleShowToolTip: (event: any) => {
+    handleShowToolTip: withVoronoi ? (event: any) => {
       const { x, y } = localPoint(event);
       const closest = stateProps.voronoiDiagram.find(x - margin.left, y - margin.top);
       if (closest) {
@@ -189,6 +197,6 @@ export const Graph = withTooltip(connect(
           tooltipTop: closest[1],
         });
       }
-    },
+    } : () => {},
   }),
 )(GraphBase));

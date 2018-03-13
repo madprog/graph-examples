@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { DataItem, RenderType } from './types';
 import { Graph as VXGraph } from './vx/LineGraph';
-import { data } from './data';
+import { fullData as data } from './data';
 
 // Properties
 export type GraphProps = {
