@@ -144,7 +144,7 @@ const collectionToBins = (coll: number[], nbBins: number): BinData[] => {
       x: parseFloat(e[0]),
       y: e[1],
     }));
-}
+};
 
 export const Graph = withTooltip(connect(
   (state: any, ownProps: GraphProps): Partial<GraphProps> => {

@@ -22,7 +22,7 @@ const margin = {
   left: 80,
   right: 80,
 };
-const x = (d: DataItem): number => d.distanceToAnchor;
+const x = (d: DataItem): number => Math.sqrt(d.x * d.x + d.y * d.y);
 const y = (d: DataItem): number => d.hardness;
 const xMax = width - margin.left - margin.right;
 const yMax = height - margin.top - margin.bottom;
