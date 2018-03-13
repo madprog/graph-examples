@@ -1,23 +1,30 @@
 import { connect } from 'react-redux';
 import * as React from 'react';
 
-import { RenderType } from './types';
+import { DataItem, RenderType } from './types';
+import { Graph as VXGraph } from './vx/BoxWhiskerGraph';
+import { data as data } from './data';
 
 // Properties
 export type GraphProps = {
+  data: DataItem[],
+}
+export type GraphContainerProps = {
   renderType: RenderType,
 }
 
-class GraphBase extends React.PureComponent<GraphProps> {
+class GraphBase extends React.PureComponent<GraphContainerProps> {
   render() {
     switch (this.props.renderType) {
+      case RenderType.VX:
+        return <VXGraph data={data} />;
       default:
         return "Box & Whisker graph not implemented yet for " + RenderType[this.props.renderType];
     }
   }
 }
 
-const mapStateToProps = ({ graph }): Partial<GraphProps> => ({
+const mapStateToProps = ({ graph }): Partial<GraphContainerProps> => ({
   renderType: graph.renderType
 });
 
